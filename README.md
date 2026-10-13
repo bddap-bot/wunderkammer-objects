@@ -17,6 +17,12 @@ nix-shell --run 'python3 make.py out engine orrery'   # some of them, into out/
 | `workload` | GPU dial, fan, memory, queue and running jobs from live data | yes |
 | `docking` | caffeine docking into the A2A adenosine receptor, from RCSB PDB 5MZP | yes |
 | `KVCrCN6` | the KV[Cr(CN)6] Prussian-blue magnet's cell with its opposed V and Cr spins | no |
+| `turbofan` | a two-spool high-bypass turbofan laid out like the CFM56-7B; scrub its spools and its bypass and core air | yes |
+| `atp_synthase` | ATP synthase in a membrane: protons turn the c-ring, and each turn the three β subunits make three ATP | yes |
+| `latency` | a globe with round trips from home racing light in fibre; data gives home and the measured round trips | yes |
+| `prussian_white` | a cell of the Prussian white sodium-ion cathode giving up its sodium and taking it back | yes |
+| `differential` | a bevel-gear differential adding two shafts' turns, as in analogue fire-control computers; data sets the numbers | yes |
+| `lorenz` | the Lorenz attractor with twin beads that start a hair apart; data sets how far | yes |
 
 ## Layout
 
@@ -29,6 +35,7 @@ Built files are not committed: `nix-build` makes all of them in under a minute.
 ## Sources
 
 - `objects/5mzp.pdb`: an extract of RCSB PDB entry 5MZP, CC0.
+- `objects/ne_110m_land.geojson`: [Natural Earth](https://www.naturalearthdata.com/) 1:110m land, public domain.
 - `objects/KVCrCN6_*`: structures from [compensated-magnet-ledger](https://github.com/spicylemonade/compensated-magnet-ledger) @ 45551de, CC BY 4.0.
 
 ## License
