@@ -4,6 +4,8 @@ import numpy as np
 import shapes
 from glb import Mesh, Node
 
+SPREADS = True
+
 TEETH = 30
 PITCH = 360.0 / TEETH
 TIP = 0.042

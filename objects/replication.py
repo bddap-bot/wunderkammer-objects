@@ -4,6 +4,8 @@ import numpy as np
 import shapes
 from glb import Node
 
+SPREADS = True
+
 SEQUENCE = "ATGCGTACCGATTGCAGTCAAGCT"
 PAIR = {"A": "T", "T": "A", "G": "C", "C": "G"}
 BASE_COLOURS = {"A": (0.2, 0.78, 0.3, 1), "T": (0.92, 0.22, 0.22, 1), "U": (1.0, 0.55, 0.72, 1), "G": (1.0, 0.72, 0.1, 1), "C": (0.22, 0.45, 1.0, 1)}

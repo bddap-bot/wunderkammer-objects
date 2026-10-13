@@ -1,4 +1,4 @@
-"""One binary glTF 2 file from a tree of nodes, optionally carrying a VOICE_program."""
+"""One binary glTF 2 file from a tree of nodes, optionally carrying a VOICE_program and VOICE_spread."""
 import json
 import struct
 from dataclasses import dataclass, field
@@ -42,7 +42,7 @@ def flatten(roots: list[Node]) -> list[Node]:
     return order
 
 
-def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0) -> bytes:
+def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0, spreads: bool = False) -> bytes:
     blob = bytearray()
     views: list[dict] = []
     accessors: list[dict] = []
@@ -83,9 +83,14 @@ def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0
             entry["children"] = [index[id(child)] for child in node.children]
         nodes.append(entry)
     gltf: dict = {"asset": {"version": "2.0"}, "scene": 0, "scenes": [{"nodes": [index[id(root)] for root in roots]}], "nodes": nodes, "meshes": meshes, "materials": materials, "accessors": accessors}
+    extensions: dict = {}
     if program is not None:
-        gltf["extensionsUsed"] = ["VOICE_program"]
-        gltf["extensions"] = {"VOICE_program": {"bufferView": view(program), "duration": duration}}
+        extensions["VOICE_program"] = {"bufferView": view(program), "duration": duration}
+    if spreads:
+        extensions["VOICE_spread"] = {}
+    if extensions:
+        gltf["extensionsUsed"] = list(extensions)
+        gltf["extensions"] = extensions
     while len(blob) % 4:
         blob.append(0)
     gltf["bufferViews"] = views

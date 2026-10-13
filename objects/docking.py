@@ -12,6 +12,8 @@ import numpy as np
 
 from glb import Mesh, Node
 
+SPREADS = True
+
 PDB = Path(__file__).with_name("5mzp.pdb")
 SIZE = 0.18
 POCKET = 8.5

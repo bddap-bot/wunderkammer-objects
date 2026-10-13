@@ -1,6 +1,7 @@
 /// Caffeine drifts in from the extracellular side along a wavering path, tumbling, and settles in its crystal pose at `APPROACH`; its interactions grow in as it binds.
 #[no_mangle]
 pub extern "C" fn tick(time: f32, _x: f32, _y: f32, _z: f32, _touching: i32) -> i32 {
+    let time = fract(time / scene::DURATION) * scene::DURATION;
     let away = 1.0 - smoothstep(0.0, scene::APPROACH, time);
     let sway = 0.25 * away * sin(3.0 * core::f32::consts::PI * away);
     let ligand = rest(scene::CAFFEINE);

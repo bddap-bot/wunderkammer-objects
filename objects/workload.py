@@ -4,6 +4,8 @@ import numpy as np
 import shapes
 from glb import Node
 
+SPREADS = True
+
 QUEUE_SLOTS = 20
 QUEUE_COLUMNS = 2
 BLOCK = (0.026, 0.0075, 0.026)

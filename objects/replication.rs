@@ -122,6 +122,7 @@ fn lagging_index(k: usize, progress: f32) -> f32 {
 
 #[no_mangle]
 pub extern "C" fn tick(time: f32, _x: f32, _y: f32, _z: f32, _touching: i32) -> i32 {
+    let time = fract(time / scene::DURATION) * scene::DURATION;
     let progress = clamp((time - scene::START) / (scene::FINISH - scene::START), 0.0, 1.0) * scene::PROGRESS_END;
     let fork = progress.min(scene::FORK_END);
     let bp = scene::BP as usize;

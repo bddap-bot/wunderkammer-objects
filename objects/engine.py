@@ -4,6 +4,8 @@ import numpy as np
 import shapes
 from glb import Mesh, Node
 
+SPREADS = True
+
 DURATION = 4.0
 CRANK = 0.024
 ROD = 0.070

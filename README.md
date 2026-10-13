@@ -20,7 +20,7 @@ nix-shell --run 'python3 make.py out engine orrery'   # some of them, into out/
 
 ## Layout
 
-- `objects/<name>.py` defines `scene()`, returning the root nodes, the program's duration and the numbers the program shares with the geometry; `objects/<name>.rs`, if present, is the program. Inputs an object reads (`5mzp.pdb`, CIF files) sit beside it.
+- `objects/<name>.py` defines `scene()`, returning the root nodes, the program's duration and the numbers the program shares with the geometry, and sets `SPREADS = True` if its parts pull apart (`VOICE_spread`); `objects/<name>.rs`, if present, is the program. Inputs an object reads (`5mzp.pdb`, CIF files) sit beside it.
 - `make.py` builds them: `python3 make.py [--objects DIR] OUT [name...]`. `default.nix` takes the same `objects` argument, so another directory of objects builds with this tooling.
 - `glb.py` writes the file and the Rust header of node indices and rest transforms; `shapes.py` makes meshes; `common.rs` is the program prelude; `crystal.py` draws a crystal cell from a CIF and a magnetic CIF.
 
