@@ -132,7 +132,7 @@ pub extern "C" fn tick(_time: f32, _x: f32, _y: f32, _z: f32, _touching: i32) ->
                 set_scale(rest(scene::ROW0_CHAR0_DOT0 + row * row_stride + c * char_stride + d), shown(on));
             }
         }
-        let values = if present { [ratio(float(bytes, at), cores as f32), ratio(float(bytes, at + 4), memory_total), clamp(float(bytes, at + 8), 0.0, 1.0)] } else { [0.0; 3] };
+        let values = if present { [clamp(float(bytes, at), 0.0, 1.0), ratio(float(bytes, at + 4), memory_total), clamp(float(bytes, at + 8), 0.0, 1.0)] } else { [0.0; 3] };
         for (b, value) in values.into_iter().enumerate() {
             let fill = [scene::ROW0_FILL0, scene::ROW0_FILL1, scene::ROW0_FILL2][b] + row * row_stride;
             set_scale(rest(fill), [value * scene::BAR_WIDTH, scene::REST[fill][8], 1.0]);
