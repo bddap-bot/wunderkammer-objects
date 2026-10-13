@@ -15,6 +15,7 @@ nix-shell --run 'python3 make.py out engine orrery'   # some of them, into out/
 | `escapement` | a Graham deadbeat escapement beating seconds; data sets the time of day | yes |
 | `tesseract` | a 4D rotation projected to 3D; data picks the planes | yes |
 | `workload` | GPU dial, fan, memory, queue and running jobs from live data | yes |
+| `monitor` | the device it runs on, htop- and nvtop-like: CPU and GPU over 40 s with their temperatures, each core with its clock, memory, the five busiest processes; fed by the host's device feed | yes |
 | `docking` | caffeine docking into the A2A adenosine receptor, from RCSB PDB 5MZP | yes |
 | `KVCrCN6` | the KV[Cr(CN)6] Prussian-blue magnet's cell with its opposed V and Cr spins | no |
 | `turbofan` | a two-spool high-bypass turbofan laid out like the CFM56-7B; scrub its spools and its bypass and core air | yes |
@@ -36,7 +37,8 @@ A host may hold an object's timeline at a time (voice's overlay does, from a rep
 
 ## Layout
 
-- `objects/<name>.py` defines `scene()`, returning the root nodes, the program's duration and the numbers the program shares with the geometry, and sets `SPREADS = True` if its parts pull apart (`VOICE_spread`); `objects/<name>.rs`, if present, is the program. Inputs an object reads (`5mzp.pdb`, CIF files) sit beside it.
+- `objects/<name>.py` defines `scene()`, returning the root nodes, the program's duration and the numbers (or lists of numbers) the program shares with the geometry, sets `SPREADS = True` if its parts pull apart (`VOICE_spread`), and `FEED = "device"` if its program reads the host's device feed; `objects/<name>.rs`, if present, is the program. Inputs an object reads (`5mzp.pdb`, CIF files) sit beside it.
+- Nodes that share one mesh and colour share a glTF mesh and material, so a host draws many of them in one call.
 - `make.py` builds them: `python3 make.py [--objects DIR] OUT [name...]`. `default.nix` takes the same `objects` argument, so another directory of objects builds with this tooling.
 - `glb.py` writes the file and the Rust header of node indices and rest transforms; `shapes.py` makes meshes; `common.rs` is the program prelude; `crystal.py` draws a crystal cell from a CIF and a magnetic CIF.
 

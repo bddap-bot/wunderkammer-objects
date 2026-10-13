@@ -42,7 +42,8 @@ def flatten(roots: list[Node]) -> list[Node]:
     return order
 
 
-def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0, spreads: bool = False) -> bytes:
+def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0, spreads: bool = False, feed: str | None = None) -> bytes:
+    """Nodes sharing one `Mesh` and colour share one glTF mesh, and nodes of one colour share a material, so a host can draw them in one call."""
     blob = bytearray()
     views: list[dict] = []
     accessors: list[dict] = []
@@ -66,13 +67,24 @@ def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0
         return len(accessors) - 1
 
     nodes = []
+    material_of: dict[tuple, int] = {}
+    attributes_of: dict[int, dict] = {}
+    mesh_of: dict[tuple[int, int], int] = {}
     for node in order:
         entry: dict = {"name": node.name}
         if node.mesh is not None:
-            materials.append({"pbrMetallicRoughness": {"baseColorFactor": list(node.color), "metallicFactor": 0.0}, **({"alphaMode": "BLEND"} if node.color[3] < 1 else {}), **({"doubleSided": True} if node.double_sided else {})})
-            attributes = {"POSITION": accessor(node.mesh.positions.astype(np.float32), "VEC3", 34962, True), "NORMAL": accessor(node.mesh.normals.astype(np.float32), "VEC3", 34962)}
-            meshes.append({"primitives": [{"attributes": attributes, "indices": accessor(node.mesh.indices.astype(np.uint32).ravel(), "SCALAR", 34963), "material": len(materials) - 1}]})
-            entry["mesh"] = len(meshes) - 1
+            look = (tuple(node.color), node.double_sided)
+            if look not in material_of:
+                materials.append({"pbrMetallicRoughness": {"baseColorFactor": list(node.color), "metallicFactor": 0.0}, **({"alphaMode": "BLEND"} if node.color[3] < 1 else {}), **({"doubleSided": True} if node.double_sided else {})})
+                material_of[look] = len(materials) - 1
+            if id(node.mesh) not in attributes_of:
+                attributes = {"POSITION": accessor(node.mesh.positions.astype(np.float32), "VEC3", 34962, True), "NORMAL": accessor(node.mesh.normals.astype(np.float32), "VEC3", 34962)}
+                attributes_of[id(node.mesh)] = {"attributes": attributes, "indices": accessor(node.mesh.indices.astype(np.uint32).ravel(), "SCALAR", 34963)}
+            key = (id(node.mesh), material_of[look])
+            if key not in mesh_of:
+                meshes.append({"primitives": [{**attributes_of[id(node.mesh)], "material": material_of[look]}]})
+                mesh_of[key] = len(meshes) - 1
+            entry["mesh"] = mesh_of[key]
         if node.translation != (0.0, 0.0, 0.0):
             entry["translation"] = list(node.translation)
         if node.rotation != (0.0, 0.0, 0.0, 1.0):
@@ -85,7 +97,7 @@ def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0
     gltf: dict = {"asset": {"version": "2.0"}, "scene": 0, "scenes": [{"nodes": [index[id(root)] for root in roots]}], "nodes": nodes, "meshes": meshes, "materials": materials, "accessors": accessors}
     extensions: dict = {}
     if program is not None:
-        extensions["VOICE_program"] = {"bufferView": view(program), "duration": duration}
+        extensions["VOICE_program"] = {"bufferView": view(program), "duration": duration, **({"feed": feed} if feed else {})}
     if spreads:
         extensions["VOICE_spread"] = {}
     if extensions:
@@ -100,14 +112,17 @@ def build(roots: list[Node], program: bytes | None = None, duration: float = 0.0
     return struct.pack("<III", 0x46546C67, 2, 28 + len(text) + len(blob)) + struct.pack("<II", len(text), 0x4E4F534A) + text + struct.pack("<II", len(blob), 0x004E4942) + bytes(blob)
 
 
-def rust_header(roots: list[Node], duration: float, constants: dict[str, float]) -> str:
+def rust_header(roots: list[Node], duration: float, constants: dict[str, float | list[float]]) -> str:
     """The node indices, rest transforms and the scene's own numbers, so the program and the geometry share one source."""
     order = flatten(roots)
     lines = [f"pub const NODES: usize = {len(order)};", f"pub const DURATION: f32 = {duration!r};"]
     for at, node in enumerate(order):
         lines.append(f"#[allow(dead_code)] pub const {node.name.upper()}: usize = {at};")
     for name, value in constants.items():
-        lines.append(f"#[allow(dead_code)] pub const {name}: f32 = {float(value)!r};")
+        if isinstance(value, list):
+            lines.append(f"#[allow(dead_code)] pub const {name}: [f32; {len(value)}] = [{', '.join(repr(float(v)) for v in value)}];")
+        else:
+            lines.append(f"#[allow(dead_code)] pub const {name}: f32 = {float(value)!r};")
     lines.append(f"pub const NAMES: [&str; NODES] = [{', '.join(repr(node.name).replace(chr(39), chr(34)) for node in order)}];")
     rest = ", ".join("[" + ", ".join(f"{float(v)!r}" for v in node.rest()) + "]" for node in order)
     lines.append(f"pub const REST: [[f32; 10]; NODES] = [{rest}];")

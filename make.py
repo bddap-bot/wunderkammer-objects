@@ -1,6 +1,6 @@
 """Builds every object in OBJECTS (default `objects/`), or those named, into OUT: `python3 make.py [--objects OBJECTS] OUT [name...]`.
 
-Each object is `<name>.py`, whose `scene()` returns its root nodes, its program's duration and the numbers the program shares with the geometry, and which sets `SPREADS = True` if its parts pull apart, beside an optional `<name>.rs` program.
+Each object is `<name>.py`, whose `scene()` returns its root nodes, its program's duration and the numbers the program shares with the geometry, and which sets `SPREADS = True` if its parts pull apart and `FEED = "device"` if its program reads the host's device feed, beside an optional `<name>.rs` program.
 The program is compiled as one no_std crate: the scene's generated constants as `mod scene`, then `common.rs`, then the object's own source.
 """
 import argparse
@@ -34,7 +34,7 @@ def make(objects: Path, name: str, out: Path) -> Path:
         with tempfile.TemporaryDirectory() as scratch:
             wasm = program(objects / f"{name}.rs", glb.rust_header(roots, duration, constants), Path(scratch))
     path = out / f"{name}.glb"
-    path.write_bytes(glb.build(roots, wasm, duration, getattr(module, "SPREADS", False)))
+    path.write_bytes(glb.build(roots, wasm, duration, getattr(module, "SPREADS", False), getattr(module, "FEED", None)))
     return path
 
 

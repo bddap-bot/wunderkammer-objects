@@ -65,6 +65,12 @@ def box(sx: float, sy: float, sz: float, at=(0, 0, 0)) -> Mesh:
     return translate(outward(Mesh(np.array(positions), np.array(normals), np.array(indices))), at)
 
 
+def quad(sx: float, sy: float, at=(0, 0, 0)) -> Mesh:
+    """A rectangle facing +z, its lower left corner at `at`."""
+    positions = np.array([[0, 0, 0], [sx, 0, 0], [sx, sy, 0], [0, sy, 0]], float) + np.asarray(at, float)
+    return Mesh(positions, np.tile([0.0, 0.0, 1.0], (4, 1)), np.array([[0, 1, 2], [0, 2, 3]]))
+
+
 def extrude(outline, depth: float) -> Mesh:
     """A flat polygon in the xz plane, counter-clockwise seen from +y, as a slab from y = -depth/2 to +depth/2; it may be concave if it is star-shaped about its first point's centroid."""
     outline = np.asarray(outline, float)
