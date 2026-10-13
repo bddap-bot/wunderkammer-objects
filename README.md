@@ -24,6 +24,16 @@ nix-shell --run 'python3 make.py out engine orrery'   # some of them, into out/
 | `differential` | a bevel-gear differential adding two shafts' turns, as in analogue fire-control computers; data sets the numbers | yes |
 | `lorenz` | the Lorenz attractor with twin beads that start a hair apart; data sets how far | yes |
 
+## Holding one still
+
+A host may hold an object's timeline at a time (voice's overlay does, from a reply's `hold`). With live data in the same reply, these pause where the data puts them:
+
+| object | data | held at |
+|---|---|---|
+| `orrery` | a date, `2026-10-12` | 0 shows that date; each further second is a tenth of a year on |
+| `escapement` | a time of day, `14:07:31` | any time shows it |
+| `engine` | none | 0 intake, 1 compression, 2 power, 3 exhaust |
+
 ## Layout
 
 - `objects/<name>.py` defines `scene()`, returning the root nodes, the program's duration and the numbers the program shares with the geometry, and sets `SPREADS = True` if its parts pull apart (`VOICE_spread`); `objects/<name>.rs`, if present, is the program. Inputs an object reads (`5mzp.pdb`, CIF files) sit beside it.
