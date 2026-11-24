@@ -25,7 +25,7 @@ nix-shell --run 'python3 make.py out engine orrery'   # some of them, into out/
 | `differential` | a bevel-gear differential adding two shafts' turns, as in analogue fire-control computers; data sets the numbers | yes |
 | `lorenz` | the Lorenz attractor with twin beads that start a hair apart; data sets how far | yes |
 
-A program takes live data of up to 1024 bytes; its `data` returns 0 for a longer update, which the host drops.
+A program's `data` grows its memory to hold an update of any length and returns where to write it, or 0 when the host allows no more memory, and the host drops that update. A host takes its view of memory after `data` returns, since growing it may move or detach the old one.
 
 ## Holding one still
 
@@ -42,7 +42,7 @@ A host may hold an object's timeline at a time (voice's overlay does, from a rep
 - `objects/<name>.py` defines `scene()`, returning the root nodes, the program's duration and the numbers (or lists of numbers) the program shares with the geometry, sets `SPREADS = True` if its parts pull apart (`VOICE_spread`), and `FEED = "device"` if its program reads the host's device feed; `objects/<name>.rs`, if present, is the program. Inputs an object reads (`5mzp.pdb`, CIF files) sit beside it.
 - Nodes that share one mesh and colour share a glTF mesh and material, so a host draws many of them in one call.
 - `make.py` builds them: `python3 make.py [--objects DIR] OUT [name...]`. `default.nix` takes the same `objects` argument, so another directory of objects builds with this tooling.
-- `glb.py` writes the file and the Rust header of node indices and rest transforms; `shapes.py` makes meshes; `common.rs` is the program prelude; `crystal.py` draws a crystal cell from a CIF and a magnetic CIF.
+- `glb.py` writes the file and the Rust header of node indices and rest transforms; `shapes.py` makes meshes; `common.rs` is the program prelude; `crystal.py` draws a crystal cell from a CIF and a magnetic CIF; `feed.test.mjs` feeds the built `monitor` device updates as a host would, and `nix-build` runs it.
 
 Built files are not committed: `nix-build` makes all of them in under a minute.
 
