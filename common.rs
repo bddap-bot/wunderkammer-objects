@@ -23,12 +23,18 @@ pub fn publish() -> i32 {
     addr_of!(OUT) as i32
 }
 
-/// For a program's `data` export: where the host writes the next update.
+/// For a program's `data` export: where the host writes the next update, or 0 for one longer than the inbox, which the host then drops.
 pub fn receive(length: i32) -> i32 {
     unsafe {
-        LENGTH = (length.max(0) as usize).min(1024);
-        FRESH = true;
-        addr_of_mut!(INBOX) as i32
+        let inbox = &mut *addr_of_mut!(INBOX);
+        match usize::try_from(length) {
+            Ok(length) if length <= inbox.len() => {
+                LENGTH = length;
+                FRESH = true;
+                inbox.as_mut_ptr() as i32
+            }
+            _ => 0,
+        }
     }
 }
 
@@ -164,4 +170,28 @@ pub fn set_rotation(record: &mut Record, rotation: [f32; 4]) {
 
 pub fn set_scale(record: &mut Record, scale: [f32; 3]) {
     record[7..].copy_from_slice(&scale);
+}
+
+#[cfg(test)]
+mod scene {
+    pub const NODES: usize = 1;
+    pub const REST: [super::Record; 1] = [[0.0; 10]];
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn an_update_longer_than_the_inbox_is_dropped_and_leaves_the_last_one() {
+        assert_ne!(receive(1024), 0);
+        assert_ne!(receive(0), 0);
+        assert_eq!(inbox(), (&b""[..], true));
+        assert_ne!(receive(3), 0);
+        unsafe { (&mut *addr_of_mut!(INBOX))[..3].copy_from_slice(b"abc") };
+        assert_eq!(inbox(), (&b"abc"[..], true));
+        assert_eq!(receive(1025), 0);
+        assert_eq!(receive(-1), 0);
+        assert_eq!(inbox(), (&b"abc"[..], false));
+    }
 }

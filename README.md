@@ -25,6 +25,8 @@ nix-shell --run 'python3 make.py out engine orrery'   # some of them, into out/
 | `differential` | a bevel-gear differential adding two shafts' turns, as in analogue fire-control computers; data sets the numbers | yes |
 | `lorenz` | the Lorenz attractor with twin beads that start a hair apart; data sets how far | yes |
 
+A program takes live data of up to 1024 bytes; its `data` returns 0 for a longer update, which the host drops.
+
 ## Holding one still
 
 A host may hold an object's timeline at a time (voice's overlay does, from a reply's `hold`). With live data in the same reply, these pause where the data puts them:
